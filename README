@@ -1,0 +1,4 @@
+This is repository with find_package modules and
+other scripts for the excellent CMake build system.
+
+Author: Mateusz Loskot <mateusz at loskot dot net>
