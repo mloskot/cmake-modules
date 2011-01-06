@@ -57,6 +57,7 @@ if(WIN32)
       NAMES gdal.h 
       PATH_PREFIXES gdal gdal-1.6
       PATHS
+      "${OSGEO4W_ROOT_DIR}/apps/gdal-dev/include"
       "$ENV{LIB_DIR}/include/gdal"
       ${OSGEO4W_ROOT_DIR}/include)
 
@@ -85,19 +86,22 @@ elseif(UNIX)
   # Try to use GDAL_HOME location if specified
   if($ENV{GDAL_HOME})
     set(GDAL_CONFIG_PREFER_PATH
-      "$ENV{GDAL_HOME}/bin" CACHE STRING "Search for gdal-config program in preferred location")
+      "$ENV{GDAL_HOME}/bin" 
+      CACHE STRING "Search for gdal-config program in preferred location")
   endif()
 
   # Try to use OSGeo4W installation
   if($ENV{OSGEO4W_HOME})
     set(GDAL_CONFIG_PREFER_OSGEO4W_PATH
-      "$ENV{OSGEO4W_HOME}/bin" CACHE STRING "Search for gdal-config program provided by OSGeo4W")
+      "$ENV{OSGEO4W_HOME}/bin"
+      CACHE STRING "Search for gdal-config program provided by OSGeo4W")
   endif()
 
   # Try to use FWTools installation
   if($ENV{FWTOOLS_HOME})
     set(GDAL_CONFIG_PREFER_FWTOOLS_PATH
-      "$ENV{FWTOOLS_HOME}/bin_safe" CACHE STRING "Search for gdal-config program provided by FWTools")
+      "$ENV{FWTOOLS_HOME}/bin_safe"
+      CACHE STRING "Search for gdal-config program provided by FWTools")
   endif()
 
   find_program(GDAL_CONFIG gdal-config
@@ -115,13 +119,16 @@ elseif(UNIX)
 
     # Extract GDAL version
     exec_program(${GDAL_CONFIG} ARGS --version OUTPUT_VARIABLE GDAL_VERSION)
-    set(GDAL_VERSION_STRING "${GDAL_VERSION}" CACHE STRING "Version of GDAL package found")
+    set(GDAL_VERSION_STRING "${GDAL_VERSION}"
+      CACHE STRING "Version of GDAL package found")
 
-    string(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)" "\\1" GDAL_VERSION_MAJOR "${GDAL_VERSION}")
-    string(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)" "\\2" GDAL_VERSION_MINOR "${GDAL_VERSION}")
+    string(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)" "\\1"
+      GDAL_VERSION_MAJOR "${GDAL_VERSION}")
+    string(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)" "\\2"
+      GDAL_VERSION_MINOR "${GDAL_VERSION}")
     
     # Check for GDAL version
-    # TODO: What version is requiredfor libLAS? --mloskot
+    # TODO: What version is required for libLAS? --mloskot
     if(GDAL_VERSION_MAJOR LESS 1 OR GDAL_VERSION_MINOR LESS 6)
       message (FATAL_ERROR "GDAL version is too old (${GDAL_VERSION}). Use 1.6.0 or higher.")
     endif()
@@ -144,12 +151,14 @@ elseif(UNIX)
     # Split off the link dirs (for rpath)
     # Use regular expression to match wildcard equivalent "-L*<endchar>"
     # with <endchar> is a space or a semicolon
-    string(REGEX MATCHALL "[-][L]([^ ;])+" GDAL_LINK_DIRECTORIES_WITH_PREFIX "${GDAL_CONFIG_LIBS}")
+    string(REGEX MATCHALL "[-][L]([^ ;])+"
+      GDAL_LINK_DIRECTORIES_WITH_PREFIX "${GDAL_CONFIG_LIBS}")
     #MESSAGE("DBG GDAL_LINK_DIRECTORIES_WITH_PREFIX=${GDAL_LINK_DIRECTORIES_WITH_PREFIX}")
 
     # Remove prefix -L because we need the pure directory for LINK_DIRECTORIES
     if(GDAL_LINK_DIRECTORIES_WITH_PREFIX)
-      string(REGEX REPLACE "[-][L]" "" GDAL_LINK_DIRECTORIES "${GDAL_LINK_DIRECTORIES_WITH_PREFIX}" )
+      string(REGEX REPLACE "[-][L]" ""
+        GDAL_LINK_DIRECTORIES "${GDAL_LINK_DIRECTORIES_WITH_PREFIX}" )
       #MESSAGE("DBG GDAL_LINK_DIRECTORIES ${GDAL_LINK_DIRECTORIES}")
     endif()
 
@@ -164,9 +173,11 @@ elseif(UNIX)
     endif()
 
     if(APPLE)
-      set(GDAL_LIBRARY ${GDAL_LINK_DIRECTORIES}/lib${GDAL_LIB_NAME}.dylib CACHE STRING INTERNAL)
+      set(GDAL_LIBRARY ${GDAL_LINK_DIRECTORIES}/lib${GDAL_LIB_NAME}.dylib
+        CACHE STRING INTERNAL)
     else()
-      set(GDAL_LIBRARY ${GDAL_LINK_DIRECTORIES}/lib${GDAL_LIB_NAME}.so CACHE STRING INTERNAL)
+      set(GDAL_LIBRARY ${GDAL_LINK_DIRECTORIES}/lib${GDAL_LIB_NAME}.so
+        CACHE STRING INTERNAL)
     endif()
     
   else()
@@ -184,4 +195,4 @@ find_package_handle_standard_args(GDAL DEFAULT_MSG GDAL_LIBRARY GDAL_INCLUDE_DIR
 
 # TODO: Do we want to mark these as advanced? --mloskot
 # http://www.cmake.org/cmake/help/cmake2.6docs.html#command:mark_as_advanced
-#MARK_AS_ADVANCED(SPATIALINDEX_LIBRARY SPATIALINDEX_INCLUDE_DIR)
+#mark_as_advanced(SPATIALINDEX_LIBRARY SPATIALINDEX_INCLUDE_DIR)
