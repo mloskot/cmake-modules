@@ -12,6 +12,9 @@
 # Author of original: Magnus Homann (Quantum GIS)
 # Modifications: Mateusz Loskot <mateusz@loskot.net>
 #
+# Redistribution and use is allowed according to the terms of the BSD license.
+# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+#
 ###############################################################################
 message(STATUS "Searching for GDAL ${GDAL_FIND_VERSION}+ library")
 message(STATUS "   NOTE: Required version is not checked - to be implemented")
