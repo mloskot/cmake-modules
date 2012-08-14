@@ -1,4 +1,6 @@
 This is repository with find_package modules and
 other scripts for the excellent CMake build system.
 
+The CMake modules and scripts are distributed under the BSD License.
+
 Author: Mateusz Loskot <mateusz at loskot dot net>
