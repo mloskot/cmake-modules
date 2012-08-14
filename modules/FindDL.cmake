@@ -1,3 +1,17 @@
+###############################################################################
+# CMake macro to find libdl library.
+#
+# On success, the macro sets the following variables:
+# DL_FOUND       = if the library found
+# DL_LIBRARY     = full path to the library
+# DL_INCLUDE_DIR = where to find the library headers 
+#
+# Author: Mateusz Loskot <mateusz@loskot.net>
+#
+# Redistribution and use is allowed according to the terms of the BSD license.
+# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+#
+###############################################################################
 if(DL_INCLUDE_DIR)
   set(DL_FIND_QUIETLY TRUE)
 endif()
