@@ -1,6 +1,5 @@
 {
-  // CMakeSettings.json for CMake integration with Visual Studio 2017
-  // See https://go.microsoft.com//fwlink//?linkid=834763 for more information about this file.
+  "_comment": "CMakeSettings.json for CMake integration with Visual Studio 2017. See https://go.microsoft.com//fwlink//?linkid=834763 for more information about this file.",
 
   "environments": [
     {
