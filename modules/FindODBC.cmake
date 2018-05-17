@@ -50,10 +50,14 @@ Result variables
 .. variable:: ODBC_INCLUDE_DIRS
 
   Paths to include directories listed in one variable for use by ODBC client.
+  May be empty on Windows, where the include directory corresponding to the
+  expected Windows SDK is already available in the compilation environment.
 
 .. variable:: ODBC_LIBRARIES
 
   Paths to libraries to linked against to use ODBC.
+  May just a library name on Windows, where the library directory corresponding
+  to the expected Windows SDK is already available in the compilation environment.
 
 .. variable:: ODBC_CONFIG
 
@@ -88,8 +92,8 @@ This module does not allow to search for a specific ODBC driver.
 ### Try Windows Kits ##########################################################
 if(WIN32)
   # List names of ODBC libraries on Windows
-  set(ODBC_LIBRARY odbc32)
-  set(_odbc_lib_names ${ODBC_LIBRARY};)
+  set(ODBC_LIBRARY odbc32.lib)
+  set(_odbc_lib_names odbc32;)
 
   # List additional libraries required to use ODBC library
   if(MSVC OR CMAKE_CXX_COMPILER_ID MATCHES "Intel")
@@ -223,11 +227,17 @@ list(APPEND ODBC_LIBRARIES ${_odbc_required_libs_paths})
 ### Import targets ############################################################
 if(ODBC_FOUND)
   if(NOT TARGET ODBC::ODBC)
-    add_library(ODBC::ODBC UNKNOWN IMPORTED)
-    set_target_properties(ODBC::ODBC
-      PROPERTIES
-      IMPORTED_LINK_INTERFACE_LANGUAGES "C"
-      IMPORTED_LOCATION "${ODBC_LIBRARY}"
+    if(IS_ABSOLUTE "${ODBC_LIBRARY}")
+      add_library(ODBC::ODBC UNKNOWN IMPORTED)
+      set_target_properties(ODBC::ODBC PROPERTIES
+        IMPORTED_LINK_INTERFACE_LANGUAGES "C"
+        IMPORTED_LOCATION "${ODBC_LIBRARY}")
+    else()
+      add_library(ODBC::ODBC INTERFACE IMPORTED)
+      set_target_properties(ODBC::ODBC PROPERTIES
+        IMPORTED_LIBNAME "${ODBC_LIBRARY}")
+    endif()
+    set_target_properties(ODBC::ODBC PROPERTIES
       INTERFACE_INCLUDE_DIRECTORIES "${ODBC_INCLUDE_DIR}")
 
     if(_odbc_required_libs_paths)
