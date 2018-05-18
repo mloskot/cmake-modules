@@ -118,31 +118,28 @@ if (UNIX AND ODBC_CONFIG)
     OUTPUT_VARIABLE _libs OUTPUT_STRIP_TRAILING_WHITESPACE)
 
   # Collect paths of include directories from CFLAGS
-  string(REGEX MATCHALL "\-I(/[^/ ]+)+" _cflags ${_cflags})
-  foreach(_path IN LISTS _cflags)
-    string(REGEX REPLACE "\-I(/[^/ ]+)" "\\1" _path ${_path})
-    list(APPEND _odbc_include_paths ${_path})
+  separate_arguments(_cflags NATIVE_COMMAND "${_cflags}")
+  foreach(arg IN LISTS _cflags)
+    if("${arg}" MATCHES "^-I(.*)$")
+      list(APPEND _odbc_include_paths "${CMAKE_MATCH_1}")
+    endif()
   endforeach()
   unset(_cflags)
 
-  # Collect paths of lib directories from LIBS
-  string(REGEX MATCHALL "\-L(/[^/ ]+)+" _lib_paths "${_libs}")
-  foreach(_path IN LISTS _lib_paths)
-    string(REGEX REPLACE "\-L(/[^/ ]+)" "\\1" _path ${_path})
-    list(APPEND _odbc_lib_paths ${_path})
-    string(REPLACE "-L${_path}" "" _libs ${_libs})
-  endforeach()
-
-  # Collect names of libraries from LIBS
-  string(REGEX MATCHALL "\-l[a-zA-Z0-9_-]+" _libs ${_libs})
-  set(_z -ldl;-lpthread;)
-  foreach(_lib IN LISTS _libs _z)
-    string(REGEX REPLACE "-l([a-zA-Z0-9_-]+)" "\\1" _lib ${_lib})
-    string(REGEX MATCH "odbc" _is_odbc ${_lib})
-    if(_is_odbc)
-      list(APPEND _odbc_lib_names ${_lib})
-    else()
-      list(APPEND _odbc_required_libs_names ${_lib})
+  # Collect paths of library names and directories from LIBS
+  separate_arguments(_libs NATIVE_COMMAND "${_libs}")
+  foreach(arg IN LISTS _libs)
+    if("${arg}" MATCHES "^-L(.*)$")
+      list(APPEND _odbc_lib_paths "${CMAKE_MATCH_1}")
+    elseif("${arg}" MATCHES "^-l(.*)$")
+      set(_lib_name ${CMAKE_MATCH_1})
+      string(REGEX MATCH "odbc" _is_odbc ${_lib_name})
+      if(_is_odbc)
+        list(APPEND _odbc_lib_names ${_lib_name})
+      else()
+        list(APPEND _odbc_required_libs_names ${_lib_name})
+      endif()
+      unset(_lib_name)
     endif()
   endforeach()
   unset(_libs)
@@ -154,21 +151,14 @@ if (UNIX AND NOT ODBC_CONFIG)
   set(_odbc_lib_names odbc;iodbc;unixodbc;)
 
   set(_odbc_include_paths
-    /usr/include
-    /usr/include/odbc
-    /usr/local/include
-    /usr/local/include/odbc
     /usr/local/odbc/include)
 
   set(_odbc_lib_paths
-    /usr/lib
-    /usr/lib/odbc
-    /usr/local/lib
-    /usr/local/lib/odbc
     /usr/local/odbc/lib)
 endif()
 
 # DEBUG
+#message("ODBC_CONFIG=${ODBC_CONFIG}")
 #message("_odbc_include_hints=${_odbc_include_hints}")
 #message("_odbc_include_paths=${_odbc_include_paths}")
 #message("_odbc_lib_paths=${_odbc_lib_paths}")
@@ -188,12 +178,14 @@ endif()
 if(NOT ODBC_LIBRARY)
   find_library(ODBC_LIBRARY
     NAMES ${_odbc_lib_names}
-    PATHS ${_odbc_lib_paths})
+    PATHS ${_odbc_lib_paths}
+    PATH_SUFFIXES odbc)
 
   foreach(_lib IN LISTS _odbc_required_libs_names)
     find_library(_lib_path
       NAMES ${_lib}
-      PATHS ${_odbc_lib_paths}) # system parths or collected from ODBC_CONFIG
+      PATHS ${_odbc_lib_paths} # system parths or collected from ODBC_CONFIG
+      PATH_SUFFIXES odbc)
     if (_lib_path)
       list(APPEND _odbc_required_libs_paths ${_lib_path})
     endif()
