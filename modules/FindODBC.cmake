@@ -103,7 +103,7 @@ if(WIN32)
   endif()
 endif()
 
-### Try nixODBC or iODBC config program #######################################
+### Try unixODBC or iODBC config program ######################################
 if (UNIX AND NOT ODBC_CONFIG)
   find_program(ODBC_CONFIG
     NAMES odbc_config iodbc-config
