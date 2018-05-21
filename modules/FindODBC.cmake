@@ -5,15 +5,7 @@
 FindODBC
 --------
 
-Find the ODBC include directory and library.
-
-Use this module by invoking find_package with the form::
-
-.. code-block:: cmake
-
-  find_package(ODBC
-    [REQUIRED]             # Fail with error if ODBC is not found
-  )
+Find an Open Database Connectivity (ODBC) include directory and library.
 
 On Windows, when building with Visual Studio, this module assumes the ODBC
 library is provided by the available Windows SDK.
@@ -67,7 +59,7 @@ Cache variables
 ^^^^^^^^^^^^^^^
 
 For users who wish to edit and control the module behavior, this module
-reads hints about search locations from the following variables::
+reads hints about search locations from the following variables:
 
 .. variable:: ODBC_INCLUDE_DIR
 
@@ -77,7 +69,7 @@ reads hints about search locations from the following variables::
 
   Path to ODBC library to be linked.
 
-NOTE: The variables above should not usually be used in CMakeLists.txt files!
+These variables should not be used directly by project code.
 
 Limitations
 ^^^^^^^^^^^
@@ -104,10 +96,13 @@ if(WIN32)
 endif()
 
 ### Try unixODBC or iODBC config program ######################################
-if (UNIX AND NOT ODBC_CONFIG)
+if (UNIX)
   find_program(ODBC_CONFIG
     NAMES odbc_config iodbc-config
     DOC "Path to unixODBC or iODBC config program")
+  mark_as_advanced(ODBC_CONFIG)
+endif()
+
 endif()
 
 if (UNIX AND ODBC_CONFIG)
@@ -159,7 +154,6 @@ endif()
 
 # DEBUG
 #message("ODBC_CONFIG=${ODBC_CONFIG}")
-#message("_odbc_include_hints=${_odbc_include_hints}")
 #message("_odbc_include_paths=${_odbc_include_paths}")
 #message("_odbc_lib_paths=${_odbc_lib_paths}")
 #message("_odbc_lib_names=${_odbc_lib_names}")
@@ -167,7 +161,6 @@ endif()
 ### Find include directories ##################################################
 find_path(ODBC_INCLUDE_DIR
   NAMES sql.h
-  HINTS ${_odbc_include_hints}
   PATHS ${_odbc_include_paths})
 
 if(NOT ODBC_INCLUDE_DIR AND WIN32)
@@ -198,19 +191,17 @@ if(NOT ODBC_LIBRARY)
 endif()
 
 ### Set result variables ######################################################
-set(REQUIRED_VARS ODBC_LIBRARY)
+set(_odbc_required_vars ODBC_LIBRARY)
 if(NOT WIN32)
-  list(APPEND REQUIRED_VARS ODBC_INCLUDE_DIR)
+  list(APPEND _odbc_required_vars ODBC_INCLUDE_DIR)
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(ODBC DEFAULT_MSG ${REQUIRED_VARS})
+find_package_handle_standard_args(ODBC DEFAULT_MSG ${_odbc_required_vars})
 
-mark_as_advanced(FORCE ODBC_LIBRARY ODBC_INCLUDE_DIR)
+unset(_odbc_required_vars)
 
-if(ODBC_CONFIG)
-  mark_as_advanced(FORCE ODBC_CONFIG)
-endif()
+mark_as_advanced(ODBC_LIBRARY ODBC_INCLUDE_DIR)
 
 set(ODBC_INCLUDE_DIRS ${ODBC_INCLUDE_DIR})
 list(APPEND ODBC_LIBRARIES ${ODBC_LIBRARY})
