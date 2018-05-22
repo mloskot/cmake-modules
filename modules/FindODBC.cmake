@@ -81,6 +81,12 @@ This module does not allow to search for a specific ODBC driver.
 
 #]=======================================================================]
 
+# Define lists used internally
+set(_odbc_include_paths)
+set(_odbc_lib_paths)
+set(_odbc_lib_names)
+set(_odbc_required_libs_names)
+
 ### Try Windows Kits ##########################################################
 if(WIN32)
   # List names of ODBC libraries on Windows
@@ -101,8 +107,6 @@ if (UNIX)
     NAMES odbc_config iodbc-config
     DOC "Path to unixODBC or iODBC config program")
   mark_as_advanced(ODBC_CONFIG)
-endif()
-
 endif()
 
 if (UNIX AND ODBC_CONFIG)
@@ -144,19 +148,7 @@ endif()
 if (UNIX AND NOT ODBC_CONFIG)
   # List names of both ODBC libraries, unixODBC and iODBC
   set(_odbc_lib_names odbc;iodbc;unixodbc;)
-
-  set(_odbc_include_paths
-    /usr/local/odbc/include)
-
-  set(_odbc_lib_paths
-    /usr/local/odbc/lib)
 endif()
-
-# DEBUG
-#message("ODBC_CONFIG=${ODBC_CONFIG}")
-#message("_odbc_include_paths=${_odbc_include_paths}")
-#message("_odbc_lib_paths=${_odbc_lib_paths}")
-#message("_odbc_lib_names=${_odbc_lib_names}")
 
 ### Find include directories ##################################################
 find_path(ODBC_INCLUDE_DIR
@@ -179,16 +171,18 @@ if(NOT ODBC_LIBRARY)
       NAMES ${_lib}
       PATHS ${_odbc_lib_paths} # system parths or collected from ODBC_CONFIG
       PATH_SUFFIXES odbc)
-    if (_lib_path)
+    if(_lib_path)
       list(APPEND _odbc_required_libs_paths ${_lib_path})
     endif()
     unset(_lib_path CACHE)
   endforeach()
-
-  unset(_odbc_lib_names)
-  unset(_odbc_lib_paths)
-  unset(_odbc_required_libs_names)
 endif()
+
+# Unset internal lists as no longer used
+unset(_odbc_include_paths)
+unset(_odbc_lib_paths)
+unset(_odbc_lib_names)
+unset(_odbc_required_libs_names)
 
 ### Set result variables ######################################################
 set(_odbc_required_vars ODBC_LIBRARY)
